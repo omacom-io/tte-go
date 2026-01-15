@@ -1,0 +1,19 @@
+pkgname=tte-go
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Terminal Text Effects (Go port)"
+arch=("x86_64")
+url=""
+license=("MIT")
+depends=()
+makedepends=("go")
+
+build() {
+  cd "$srcdir/tte-go"
+  go build -trimpath -ldflags="-s -w" -o tte ./cmd/tte
+}
+
+package() {
+  cd "$srcdir/tte-go"
+  install -Dm755 tte "$pkgdir/usr/bin/tte"
+}
