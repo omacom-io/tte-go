@@ -24,8 +24,7 @@ func New(cfg config.TerminalConfig) *Terminal {
 	if cfg.FrameRate > 0 {
 		delay = time.Second / time.Duration(cfg.FrameRate)
 	}
-	width, height := getTerminalSize()
-	return &Terminal{config: cfg, frameDelay: delay, termWidth: width, termHeight: height}
+	return &Terminal{config: cfg, frameDelay: delay}
 }
 
 func (t *Terminal) Prepare() {
@@ -33,14 +32,12 @@ func (t *Terminal) Prepare() {
 		return
 	}
 	fmt.Fprint(os.Stdout, utils.AnsiHideCursor)
-	fmt.Fprint(os.Stdout, utils.AnsiWrapDisable)
 	fmt.Fprint(os.Stdout, utils.AnsiClearScreen)
 	fmt.Fprint(os.Stdout, utils.AnsiHomeCursor)
 	t.initialized = true
 }
 
 func (t *Terminal) Restore(endSymbol string) {
-	fmt.Fprint(os.Stdout, utils.AnsiWrapEnable)
 	if t.config.NoRestoreCursor {
 		return
 	}

@@ -2,7 +2,7 @@ package terminal
 
 import "strings"
 
-func clipFrame(frame string, width int, height int) string {
+func clipToWidth(frame string, width int) string {
 	if width <= 0 {
 		return frame
 	}
@@ -13,4 +13,14 @@ func clipFrame(frame string, width int, height int) string {
 		}
 	}
 	return strings.Join(lines, "\n")
+}
+
+func lenLongestLine(frame string) int {
+	max := 0
+	for _, line := range strings.Split(frame, "\n") {
+		if len(line) > max {
+			max = len(line)
+		}
+	}
+	return max
 }

@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"math"
 
 	"tte-go/internal/utils"
 )
@@ -67,7 +68,22 @@ func (m *Motion) ActivatePath(path *Path) {
 	path.rebuild()
 	path.currentStep = 0
 	path.holdRemaining = path.HoldTime
-	path.maxSteps = int(path.totalDistance() / path.Speed)
+	if len(path.Waypoints) > 0 {
+		first := path.Waypoints[0]
+		distance := utils.Distance(m.CurrentCoord, first.Coord, true)
+		origin := pathSegment{Start: m.CurrentCoord, End: first.Coord, Distance: distance}
+		path.totalDistance += distance
+		if path.originSegment != nil {
+			if len(path.segments) > 0 {
+				path.segments = path.segments[1:]
+			}
+		}
+		path.originSegment = &origin
+		path.segments = append([]pathSegment{origin}, path.segments...)
+	}
+	if path.Speed > 0 {
+		path.maxSteps = int(math.Round(path.totalDistance / path.Speed))
+	}
 	if path.Layer != 0 {
 		m.Character.Layer = path.Layer
 	}

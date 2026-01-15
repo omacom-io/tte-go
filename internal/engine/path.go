@@ -24,8 +24,10 @@ type Path struct {
 	currentStep   int
 	maxSteps      int
 	segments      []pathSegment
+	originSegment *pathSegment
 	lastDistance  float64
 	holdRemaining int
+	totalDistance float64
 }
 
 type pathSegment struct {
@@ -61,6 +63,8 @@ func (p *Path) rebuild() {
 	p.currentStep = 0
 	p.lastDistance = 0
 	p.holdRemaining = p.HoldTime
+	p.totalDistance = 0
+	p.originSegment = nil
 	if len(p.Waypoints) < 2 {
 		return
 	}
@@ -80,6 +84,7 @@ func (p *Path) rebuild() {
 	if p.Speed > 0 {
 		p.maxSteps = int(math.Round(total / p.Speed))
 	}
+	p.totalDistance = total
 }
 
 func (p *Path) Step(handler *EventHandler) (utils.Coord, bool) {
@@ -111,7 +116,7 @@ func (p *Path) Step(handler *EventHandler) (utils.Coord, bool) {
 	if factor > 1 {
 		factor = 1
 	}
-	distanceToTravel := factor * p.totalDistance()
+	distanceToTravel := factor * p.totalDistance
 	p.lastDistance = distanceToTravel
 	for index := range p.segments {
 		segment := &p.segments[index]
@@ -132,7 +137,7 @@ func (p *Path) Step(handler *EventHandler) (utils.Coord, bool) {
 	return p.segments[len(p.segments)-1].End, true
 }
 
-func (p *Path) totalDistance() float64 {
+func (p *Path) calculateTotalDistance() float64 {
 	total := 0.0
 	for _, segment := range p.segments {
 		total += segment.Distance

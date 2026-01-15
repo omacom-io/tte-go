@@ -23,6 +23,15 @@ func NewTerminalState(canvas *terminal.Canvas, characters []*EffectCharacter) *T
 		AddedChars:     []*EffectCharacter{},
 		Visible:        map[*EffectCharacter]struct{}{},
 	}
+	for _, character := range characters {
+		character.Visible = false
+	}
+	for _, character := range inner {
+		character.Visible = false
+	}
+	for _, character := range outer {
+		character.Visible = false
+	}
 	return state
 }
 
