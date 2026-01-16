@@ -215,6 +215,22 @@ func (l *LaserEtch) initSparks() {
 			_ = sparkScene.AddFrame(char.Symbol, l.sparkCoolingFrames, &utils.ColorPair{FG: &colorCopy})
 		}
 
+		// Register callback to hide spark when scene completes
+		terminal := l.base.Terminal
+		char.EventHandler.RegisterEvent(
+			engine.EventSceneComplete,
+			sparkScene,
+			engine.ActionCallback,
+			engine.Callback{
+				Fn: func(c *engine.EffectCharacter, args ...any) {
+					if t, ok := args[0].(*engine.TerminalState); ok {
+						t.SetCharacterVisibility(c, false)
+					}
+				},
+				Args: []any{terminal},
+			},
+		)
+
 		l.sparks = append(l.sparks, char)
 	}
 }
