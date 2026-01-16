@@ -3,6 +3,7 @@ package terminal
 import (
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"tte-go/internal/config"
 	"tte-go/internal/utils"
@@ -36,8 +37,9 @@ func NewCanvas(input string, cfg config.TerminalConfig) *Canvas {
 	textHeight := len(lines)
 	textWidth := 0
 	for _, line := range lines {
-		if len(line) > textWidth {
-			textWidth = len(line)
+		lineWidth := utf8.RuneCountInString(line)
+		if lineWidth > textWidth {
+			textWidth = lineWidth
 		}
 	}
 
