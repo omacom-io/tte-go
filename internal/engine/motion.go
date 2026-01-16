@@ -70,8 +70,16 @@ func (m *Motion) ActivatePath(path *Path) {
 	path.holdRemaining = path.HoldTime
 	if len(path.Waypoints) > 0 {
 		first := path.Waypoints[0]
-		distance := utils.Distance(m.CurrentCoord, first.Coord, true)
-		origin := pathSegment{Start: m.CurrentCoord, End: first.Coord, Distance: distance}
+		var distance float64
+		var control *utils.Coord
+		if first.Control != nil {
+			distance = utils.BezierLength(m.CurrentCoord, *first.Control, first.Coord, 20)
+			controlCopy := *first.Control
+			control = &controlCopy
+		} else {
+			distance = utils.Distance(m.CurrentCoord, first.Coord, true)
+		}
+		origin := pathSegment{Start: m.CurrentCoord, End: first.Coord, Control: control, Distance: distance}
 		path.totalDistance += distance
 		if path.originSegment != nil {
 			if len(path.segments) > 0 {

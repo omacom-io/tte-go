@@ -33,6 +33,7 @@ type Path struct {
 type pathSegment struct {
 	Start          utils.Coord
 	End            utils.Coord
+	Control        *utils.Coord // bezier control point (nil for linear)
 	Distance       float64
 	enterTriggered bool
 	exitTriggered  bool
@@ -73,13 +74,16 @@ func (p *Path) rebuild() {
 		start := p.Waypoints[i-1]
 		end := p.Waypoints[i]
 		var dist float64
+		var control *utils.Coord
 		if end.Control != nil {
 			dist = utils.BezierLength(start.Coord, *end.Control, end.Coord, 20)
+			controlCopy := *end.Control
+			control = &controlCopy
 		} else {
 			dist = utils.Distance(start.Coord, end.Coord, true)
 		}
 		total += dist
-		p.segments = append(p.segments, pathSegment{Start: start.Coord, End: end.Coord, Distance: dist})
+		p.segments = append(p.segments, pathSegment{Start: start.Coord, End: end.Coord, Control: control, Distance: dist})
 	}
 	if p.Speed > 0 {
 		p.maxSteps = int(math.Round(total / p.Speed))
@@ -126,6 +130,9 @@ func (p *Path) Step(handler *EventHandler) (utils.Coord, bool) {
 				handler.Handle(EventSegmentEntered, segment)
 			}
 			localT := distanceToTravel / math.Max(segment.Distance, 1)
+			if segment.Control != nil {
+				return utils.BezierPoint(segment.Start, *segment.Control, segment.End, localT), true
+			}
 			return utils.Lerp(segment.Start, segment.End, localT), true
 		}
 		distanceToTravel -= segment.Distance
