@@ -32,6 +32,15 @@ func NewTerminalState(canvas *terminal.Canvas, characters []*EffectCharacter) *T
 	for _, character := range outer {
 		character.Visible = false
 	}
+
+	// Rebuild neighbors to include fill characters so spanning tree algorithms
+	// can traverse through spaces to reach all characters
+	allChars := make([]*EffectCharacter, 0, len(characters)+len(inner)+len(outer))
+	allChars = append(allChars, characters...)
+	allChars = append(allChars, inner...)
+	allChars = append(allChars, outer...)
+	BuildNeighbors(allChars)
+
 	return state
 }
 
