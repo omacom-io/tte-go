@@ -96,7 +96,7 @@ func GroupCharactersWithCanvas(characters []*EffectCharacter, canvas *terminal.C
 		keys = append(keys, key)
 	}
 	sort.Ints(keys)
-	if grouping == RowBottomToTop || grouping == ColumnRightToLeft || grouping == DiagonalBottomRightToTopLeft || grouping == DiagonalBottomLeftToTopRight || grouping == OutsideToCenter {
+	if grouping == RowTopToBottom || grouping == ColumnRightToLeft || grouping == DiagonalBottomRightToTopLeft || grouping == DiagonalBottomLeftToTopRight || grouping == OutsideToCenter {
 		reverse(keys)
 	}
 	result := make([][]*EffectCharacter, 0, len(keys))
