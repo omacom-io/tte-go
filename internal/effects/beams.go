@@ -327,3 +327,7 @@ func filterTextBound(chars []*engine.EffectCharacter, canvas *terminal.Canvas) [
 	}
 	return filtered
 }
+
+func (b *Beams) CanvasHeight() int {
+	return b.base.CanvasHeight()
+}

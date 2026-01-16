@@ -12,6 +12,7 @@ func New(term *terminal.Terminal) *Engine {
 
 func (e *Engine) Run(effect Effect) error {
 	e.terminal.Prepare()
+	e.terminal.PrepareCanvas(effect.CanvasHeight())
 	defer e.terminal.Restore("")
 
 	frame, ok := effect.Next()

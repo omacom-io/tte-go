@@ -94,3 +94,7 @@ func (r *RandomSequence) Next() (string, bool) {
 	}
 	return "", false
 }
+
+func (r *RandomSequence) CanvasHeight() int {
+	return r.base.CanvasHeight()
+}

@@ -36,3 +36,7 @@ func randomGlyph() string {
 	glyphs := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*@")
 	return string(glyphs[utils.RandIntn(len(glyphs))])
 }
+
+func (d *Decrypt) CanvasHeight() int {
+	return d.base.CanvasHeight()
+}

@@ -114,3 +114,7 @@ func (w *Wipe) Next() (string, bool) {
 	}
 	return w.base.Terminal.GetFormattedOutputString(), true
 }
+
+func (w *Wipe) CanvasHeight() int {
+	return w.base.CanvasHeight()
+}

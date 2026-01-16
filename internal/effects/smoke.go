@@ -32,3 +32,7 @@ func (s *Smoke) Next() (string, bool) {
 	s.current++
 	return frame, s.current <= s.base.Canvas.Width
 }
+
+func (s *Smoke) CanvasHeight() int {
+	return s.base.CanvasHeight()
+}

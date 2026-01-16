@@ -31,3 +31,7 @@ func (s *Spray) Next() (string, bool) {
 	frame := engine.RenderFrame(s.base.Canvas, s.base.Characters)
 	return frame, s.index < len(s.base.Characters)+1
 }
+
+func (s *Spray) CanvasHeight() int {
+	return s.base.CanvasHeight()
+}

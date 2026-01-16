@@ -116,3 +116,7 @@ func (m *MiddleOut) Next() (string, bool) {
 	}
 	return m.base.Terminal.GetFormattedOutputString(), true
 }
+
+func (m *MiddleOut) CanvasHeight() int {
+	return m.base.CanvasHeight()
+}

@@ -138,3 +138,7 @@ func minRowKey(groups map[int][]*engine.EffectCharacter) int {
 	}
 	return min
 }
+
+func (r *Rain) CanvasHeight() int {
+	return r.base.CanvasHeight()
+}

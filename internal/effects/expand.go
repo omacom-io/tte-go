@@ -86,3 +86,7 @@ func (e *Expand) Next() (string, bool) {
 	}
 	return e.base.Terminal.GetFormattedOutputString(), true
 }
+
+func (e *Expand) CanvasHeight() int {
+	return e.base.CanvasHeight()
+}

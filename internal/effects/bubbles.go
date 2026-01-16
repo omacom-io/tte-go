@@ -28,3 +28,7 @@ func (b *Bubbles) Next() (string, bool) {
 	b.phase += 0.3
 	return engine.RenderFrame(b.base.Canvas, b.base.Characters), true
 }
+
+func (b *Bubbles) CanvasHeight() int {
+	return b.base.CanvasHeight()
+}

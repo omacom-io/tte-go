@@ -32,3 +32,7 @@ func (m *Matrix) Next() (string, bool) {
 	frame := engine.RenderFrame(m.base.Canvas, m.base.Characters)
 	return frame, true
 }
+
+func (m *Matrix) CanvasHeight() int {
+	return m.base.CanvasHeight()
+}

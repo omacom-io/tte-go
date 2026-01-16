@@ -30,3 +30,7 @@ func (s *Spotlights) Next() (string, bool) {
 	frame := engine.RenderFrame(s.base.Canvas, s.base.Characters)
 	return frame, s.step <= s.base.Canvas.Width
 }
+
+func (s *Spotlights) CanvasHeight() int {
+	return s.base.CanvasHeight()
+}

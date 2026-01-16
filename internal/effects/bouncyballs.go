@@ -29,3 +29,7 @@ func (b *BouncyBalls) Next() (string, bool) {
 	frame := engine.RenderFrame(b.base.Canvas, b.base.Characters)
 	return frame, true
 }
+
+func (b *BouncyBalls) CanvasHeight() int {
+	return b.base.CanvasHeight()
+}

@@ -33,3 +33,10 @@ func (e *BaseEffect) Next() (string, bool) {
 	e.Done = true
 	return e.Terminal.GetFormattedOutputString(), true
 }
+
+func (e *BaseEffect) CanvasHeight() int {
+	if e.Canvas == nil {
+		return 0
+	}
+	return e.Canvas.Height
+}

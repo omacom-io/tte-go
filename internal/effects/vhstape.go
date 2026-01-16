@@ -24,3 +24,7 @@ func (v *VHSTape) Next() (string, bool) {
 	frame := engine.RenderFrame(v.base.Canvas, v.base.Characters)
 	return frame, true
 }
+
+func (v *VHSTape) CanvasHeight() int {
+	return v.base.CanvasHeight()
+}

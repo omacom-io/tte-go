@@ -198,3 +198,7 @@ func (s *Slice) Next() (string, bool) {
 	}
 	return s.base.Terminal.GetFormattedOutputString(), true
 }
+
+func (s *Slice) CanvasHeight() int {
+	return s.base.CanvasHeight()
+}

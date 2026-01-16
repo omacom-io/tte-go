@@ -36,3 +36,7 @@ func (b *BinaryPath) Next() (string, bool) {
 	b.frames++
 	return engine.RenderFrame(b.base.Canvas, b.base.Characters), true
 }
+
+func (b *BinaryPath) CanvasHeight() int {
+	return b.base.CanvasHeight()
+}

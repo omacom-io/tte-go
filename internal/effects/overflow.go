@@ -29,3 +29,7 @@ func (o *Overflow) Next() (string, bool) {
 	}
 	return engine.RenderFrame(o.base.Canvas, o.base.Characters), true
 }
+
+func (o *Overflow) CanvasHeight() int {
+	return o.base.CanvasHeight()
+}

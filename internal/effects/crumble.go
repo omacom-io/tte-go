@@ -30,3 +30,7 @@ func (c *Crumble) Next() (string, bool) {
 	c.frames++
 	return engine.RenderFrame(c.base.Canvas, c.base.Characters), true
 }
+
+func (c *Crumble) CanvasHeight() int {
+	return c.base.CanvasHeight()
+}

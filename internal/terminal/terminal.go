@@ -11,12 +11,13 @@ import (
 )
 
 type Terminal struct {
-	config      config.TerminalConfig
-	frameDelay  time.Duration
-	lastLines   int
-	initialized bool
-	termWidth   int
-	termHeight  int
+	config       config.TerminalConfig
+	frameDelay   time.Duration
+	lastLines    int
+	initialized  bool
+	termWidth    int
+	termHeight   int
+	canvasHeight int
 }
 
 func New(cfg config.TerminalConfig) *Terminal {
@@ -37,6 +38,15 @@ func (t *Terminal) Prepare() {
 	t.initialized = true
 }
 
+func (t *Terminal) PrepareCanvas(height int) {
+	t.canvasHeight = height
+	// Print blank lines to establish canvas space, then save cursor position
+	for i := 0; i < height; i++ {
+		fmt.Fprint(os.Stdout, "\n")
+	}
+	fmt.Fprint(os.Stdout, utils.AnsiDecSaveCursor)
+}
+
 func (t *Terminal) Restore(endSymbol string) {
 	if t.config.NoRestoreCursor {
 		return
@@ -53,8 +63,14 @@ func (t *Terminal) PrintFrame(frame string, isLast bool) {
 	}
 
 	normalized := normalizeNewlines(frame)
-	fmt.Fprint(os.Stdout, utils.AnsiClearScreen)
-	fmt.Fprint(os.Stdout, utils.AnsiHomeCursor)
+
+	// Restore cursor to saved position, save again, then move up to top of canvas
+	fmt.Fprint(os.Stdout, utils.AnsiDecRestoreCursor)
+	fmt.Fprint(os.Stdout, utils.AnsiDecSaveCursor)
+	if t.canvasHeight > 0 {
+		fmt.Fprint(os.Stdout, utils.MoveCursorUp(t.canvasHeight))
+	}
+
 	fmt.Fprint(os.Stdout, normalized)
 
 	lines := countLines(frame)

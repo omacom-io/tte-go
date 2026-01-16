@@ -184,3 +184,7 @@ func (s *Slide) Next() (string, bool) {
 	}
 	return s.base.Terminal.GetFormattedOutputString(), true
 }
+
+func (s *Slide) CanvasHeight() int {
+	return s.base.CanvasHeight()
+}

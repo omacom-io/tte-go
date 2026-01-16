@@ -36,3 +36,7 @@ func (l *LaserEtch) Next() (string, bool) {
 	l.index++
 	return engine.RenderFrame(l.base.Canvas, l.base.Characters), l.index < len(l.order)+1
 }
+
+func (l *LaserEtch) CanvasHeight() int {
+	return l.base.CanvasHeight()
+}

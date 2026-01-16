@@ -29,3 +29,7 @@ func (r *Rings) Next() (string, bool) {
 	r.phase += 0.2
 	return engine.RenderFrame(r.base.Canvas, r.base.Characters), true
 }
+
+func (r *Rings) CanvasHeight() int {
+	return r.base.CanvasHeight()
+}

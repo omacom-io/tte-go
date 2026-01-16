@@ -30,3 +30,7 @@ func (h *Highlight) Next() (string, bool) {
 	frame := engine.RenderFrame(h.base.Canvas, h.base.Characters)
 	return frame, h.cursor <= h.base.Canvas.Width
 }
+
+func (h *Highlight) CanvasHeight() int {
+	return h.base.CanvasHeight()
+}

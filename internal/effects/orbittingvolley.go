@@ -28,3 +28,7 @@ func (o *OrbittingVolley) Next() (string, bool) {
 	frame := engine.RenderFrame(o.base.Canvas, o.base.Characters)
 	return frame, o.step <= o.base.Canvas.Width
 }
+
+func (o *OrbittingVolley) CanvasHeight() int {
+	return o.base.CanvasHeight()
+}

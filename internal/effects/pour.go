@@ -28,3 +28,7 @@ func (p *Pour) Next() (string, bool) {
 	}
 	return engine.RenderFrame(p.base.Canvas, p.base.Characters), active
 }
+
+func (p *Pour) CanvasHeight() int {
+	return p.base.CanvasHeight()
+}

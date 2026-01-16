@@ -104,3 +104,7 @@ func (s *Scattered) Next() (string, bool) {
 	}
 	return s.base.Terminal.GetFormattedOutputString(), true
 }
+
+func (s *Scattered) CanvasHeight() int {
+	return s.base.CanvasHeight()
+}

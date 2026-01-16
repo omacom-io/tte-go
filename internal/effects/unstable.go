@@ -32,3 +32,7 @@ func (u *Unstable) Next() (string, bool) {
 	u.frames++
 	return engine.RenderFrame(u.base.Canvas, u.base.Characters), true
 }
+
+func (u *Unstable) CanvasHeight() int {
+	return u.base.CanvasHeight()
+}

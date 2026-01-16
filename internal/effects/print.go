@@ -247,3 +247,7 @@ func leftMostNonFill(chars []*engine.EffectCharacter) int {
 	}
 	return min
 }
+
+func (p *Print) CanvasHeight() int {
+	return p.base.CanvasHeight()
+}

@@ -43,3 +43,7 @@ func (b *Blackhole) Next() (string, bool) {
 	frame := engine.RenderFrame(b.base.Canvas, b.base.Characters)
 	return frame, !done
 }
+
+func (b *Blackhole) CanvasHeight() int {
+	return b.base.CanvasHeight()
+}

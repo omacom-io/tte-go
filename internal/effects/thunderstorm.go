@@ -30,3 +30,7 @@ func (t *Thunderstorm) Next() (string, bool) {
 	frame := engine.RenderFrame(t.base.Canvas, t.base.Characters)
 	return frame, true
 }
+
+func (t *Thunderstorm) CanvasHeight() int {
+	return t.base.CanvasHeight()
+}

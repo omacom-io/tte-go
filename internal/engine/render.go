@@ -64,6 +64,7 @@ func RenderFrame(canvas *terminal.Canvas, characters []*EffectCharacter) string 
 		line := strings.Join(grid[row], "")
 		line = strings.TrimRight(line, " ")
 		builder.WriteString(line)
+		builder.WriteString("\x1b[K") // Clear to end of line
 		if row > 0 {
 			builder.WriteString("\n")
 		}

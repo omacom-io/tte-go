@@ -38,3 +38,7 @@ func (c *ColorShift) Next() (string, bool) {
 	c.offset++
 	return frame, true
 }
+
+func (c *ColorShift) CanvasHeight() int {
+	return c.base.CanvasHeight()
+}

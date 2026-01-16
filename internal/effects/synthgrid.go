@@ -32,3 +32,7 @@ func (s *SynthGrid) Next() (string, bool) {
 	s.current++
 	return frame, s.current <= width
 }
+
+func (s *SynthGrid) CanvasHeight() int {
+	return s.base.CanvasHeight()
+}

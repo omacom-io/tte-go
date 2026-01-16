@@ -31,3 +31,7 @@ func (e *ErrorCorrect) Next() (string, bool) {
 	e.frames++
 	return engine.RenderFrame(e.base.Canvas, e.base.Characters), true
 }
+
+func (e *ErrorCorrect) CanvasHeight() int {
+	return e.base.CanvasHeight()
+}

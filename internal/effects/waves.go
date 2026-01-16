@@ -27,3 +27,7 @@ func (w *Waves) Next() (string, bool) {
 	frame := engine.RenderFrame(w.base.Canvas, w.base.Characters)
 	return frame, true
 }
+
+func (w *Waves) CanvasHeight() int {
+	return w.base.CanvasHeight()
+}

@@ -39,3 +39,7 @@ func (f *Fireworks) Next() (string, bool) {
 	frame := engine.RenderFrame(f.base.Canvas, f.base.Characters)
 	return frame, active
 }
+
+func (f *Fireworks) CanvasHeight() int {
+	return f.base.CanvasHeight()
+}

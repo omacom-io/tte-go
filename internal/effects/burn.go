@@ -31,3 +31,7 @@ func (b *Burn) Next() (string, bool) {
 	frame := engine.RenderFrame(b.base.Canvas, b.base.Characters)
 	return frame, b.current <= b.base.Canvas.Height
 }
+
+func (b *Burn) CanvasHeight() int {
+	return b.base.CanvasHeight()
+}
