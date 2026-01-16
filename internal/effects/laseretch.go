@@ -130,7 +130,7 @@ func (l *LaserEtch) runRecursiveBacktracker() []*engine.EffectCharacter {
 		// Get unvisited neighbors
 		unvisitedNeighbors := make([]*engine.EffectCharacter, 0)
 		for _, neighbor := range current.Neighbors {
-			if !visited[neighbor] {
+			if neighbor != nil && !visited[neighbor] {
 				unvisitedNeighbors = append(unvisitedNeighbors, neighbor)
 			}
 		}

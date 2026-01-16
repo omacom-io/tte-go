@@ -73,6 +73,8 @@ func (e *ErrorCorrect) build() {
 		colorCopy := charFinalColor
 		_ = spawnScene.AddFrame(character.Symbol, 1, &utils.ColorPair{FG: &colorCopy})
 		character.Animation.ActivateSceneRef(spawnScene)
+		// Tick once to set the current visual from the scene
+		character.Tick()
 		e.base.Terminal.SetCharacterVisibility(character, true)
 	}
 
