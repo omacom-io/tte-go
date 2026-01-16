@@ -43,3 +43,53 @@ func BezierLength(p0, p1, p2 Coord, samples int) float64 {
 	}
 	return length
 }
+
+func FindCoordsOnCircle(origin Coord, radius int, coordsLimit int, unique bool) []Coord {
+	points := []Coord{}
+	if radius == 0 {
+		return points
+	}
+	if coordsLimit == 0 {
+		coordsLimit = PyRound(2 * math.Pi * float64(radius))
+	}
+	if coordsLimit <= 0 {
+		coordsLimit = 1
+	}
+	angleStep := 2 * math.Pi / float64(coordsLimit)
+	seen := map[Coord]struct{}{}
+	for i := 0; i < coordsLimit; i++ {
+		angle := angleStep * float64(i)
+		x := float64(origin.Col) + float64(radius)*math.Cos(angle)
+		xDiff := x - float64(origin.Col)
+		x += xDiff
+		y := float64(origin.Row) + float64(radius)*math.Sin(angle)
+		point := Coord{Row: PyRound(y), Col: PyRound(x)}
+		if unique {
+			if _, ok := seen[point]; ok {
+				continue
+			}
+			seen[point] = struct{}{}
+		}
+		points = append(points, point)
+	}
+	return points
+}
+
+func FindCoordsInCircle(center Coord, diameter int) []Coord {
+	coords := []Coord{}
+	if diameter == 0 {
+		return coords
+	}
+	h := center.Col
+	k := center.Row
+	aSquared := float64(diameter * diameter)
+	bSquared := math.Pow(float64(diameter)/2, 2)
+	for x := h - diameter; x <= h+diameter; x++ {
+		xComponent := float64((x-h)*(x-h)) / aSquared
+		maxYOffset := int(math.Sqrt(math.Max(bSquared*(1-xComponent), 0)))
+		for y := k - maxYOffset; y <= k+maxYOffset; y++ {
+			coords = append(coords, Coord{Row: y, Col: x})
+		}
+	}
+	return coords
+}
