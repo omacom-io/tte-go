@@ -58,9 +58,14 @@ func (c *EffectCharacter) Tick() {
 	if c.Animation == nil {
 		return
 	}
+	activeScene := c.Animation.ActiveScene
 	visual, ok := c.Animation.Next()
 	if ok {
 		c.current = visual
+	}
+	// Check if scene just completed and fire event
+	if activeScene != nil && activeScene.IsComplete() && c.EventHandler != nil {
+		c.EventHandler.Handle(EventSceneComplete, activeScene)
 	}
 }
 
