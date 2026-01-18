@@ -20,6 +20,7 @@ type Scene struct {
 	Preexisting       *utils.ColorPair
 	UseXtermColors    bool
 	NoColor           bool
+	Ease              utils.EasingFunction // When set, use eased playback instead of linear frame stepping
 	frameIndexMap     map[int]*Frame
 	easingTotalSteps  int
 	easingCurrentStep int
@@ -111,6 +112,54 @@ func (s *Scene) GetNextVisual() (CharacterVisual, bool) {
 	if len(s.Frames) == 0 {
 		return CharacterVisual{}, false
 	}
+
+	// When easing is set, use eased playback (maps linear step progress to eased frame index)
+	if s.Ease != nil {
+		// Calculate easing factor: ease(currentStep / totalSteps)
+		var easingFactor float64
+		if s.easingTotalSteps > 0 {
+			easingFactor = s.Ease(float64(s.easingCurrentStep) / float64(s.easingTotalSteps))
+		}
+
+		// Map easing factor to frame index
+		maxIndex := s.easingTotalSteps - 1
+		if maxIndex < 0 {
+			maxIndex = 0
+		}
+		frameIndex := int(easingFactor*float64(maxIndex) + 0.5) // round
+		if frameIndex < 0 {
+			frameIndex = 0
+		}
+		if frameIndex > maxIndex {
+			frameIndex = maxIndex
+		}
+
+		// Get frame from index map
+		frame, ok := s.frameIndexMap[frameIndex]
+		if !ok {
+			// Fallback to first frame if map lookup fails
+			frame = s.Frames[0]
+		}
+		visual := frame.Visual
+
+		// Advance step
+		s.easingCurrentStep++
+
+		// Check for completion
+		if s.easingCurrentStep >= s.easingTotalSteps {
+			if s.IsLooping {
+				s.easingCurrentStep = 0
+			} else {
+				// Mark scene as complete by moving all frames to played
+				s.PlayedFrames = append(s.PlayedFrames, s.Frames...)
+				s.Frames = nil
+			}
+		}
+
+		return visual, true
+	}
+
+	// Non-eased playback: linear frame stepping
 	current := s.Frames[0]
 	visual := current.Visual
 	current.TicksElapsed++
