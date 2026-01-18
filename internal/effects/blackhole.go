@@ -391,7 +391,9 @@ func (b *Blackhole) Next() (string, bool) {
 		// Wait for all blackhole characters to finish their collapse animation
 		allBlackholesDone := true
 		for _, char := range b.blackholeChars {
-			if char.Motion.ActivePath != nil || char.Animation.ActiveScene != nil {
+			hasPath := char.Motion.ActivePath != nil
+			hasScene := char.Animation.ActiveScene != nil
+			if hasPath || hasScene {
 				allBlackholesDone = false
 				break
 			}

@@ -64,8 +64,14 @@ func (c *EffectCharacter) Tick() {
 		c.current = visual
 	}
 	// Check if scene just completed and fire event
-	if activeScene != nil && activeScene.IsComplete() && c.EventHandler != nil {
-		c.EventHandler.Handle(EventSceneComplete, activeScene)
+	if activeScene != nil && activeScene.IsComplete() {
+		if c.EventHandler != nil {
+			c.EventHandler.Handle(EventSceneComplete, activeScene)
+		}
+		// Clear active scene when complete (non-looping scenes)
+		if !activeScene.IsLooping {
+			c.Animation.ActiveScene = nil
+		}
 	}
 }
 
