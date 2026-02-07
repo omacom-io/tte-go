@@ -365,3 +365,7 @@ func (b *Bubbles) Next() (string, bool) {
 func (b *Bubbles) CanvasHeight() int {
 	return b.base.CanvasHeight()
 }
+
+func (b *Bubbles) CanvasWidth() int {
+	return b.base.CanvasWidth()
+}

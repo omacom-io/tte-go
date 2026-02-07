@@ -260,3 +260,7 @@ func (e *ErrorCorrect) Next() (string, bool) {
 func (e *ErrorCorrect) CanvasHeight() int {
 	return e.base.CanvasHeight()
 }
+
+func (e *ErrorCorrect) CanvasWidth() int {
+	return e.base.CanvasWidth()
+}

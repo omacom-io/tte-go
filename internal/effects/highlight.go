@@ -145,3 +145,7 @@ func (h *Highlight) Next() (string, bool) {
 func (h *Highlight) CanvasHeight() int {
 	return h.base.CanvasHeight()
 }
+
+func (h *Highlight) CanvasWidth() int {
+	return h.base.CanvasWidth()
+}

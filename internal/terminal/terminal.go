@@ -18,6 +18,7 @@ type Terminal struct {
 	termWidth    int
 	termHeight   int
 	canvasHeight int
+	canvasWidth  int
 }
 
 func New(cfg config.TerminalConfig) *Terminal {
@@ -33,16 +34,30 @@ func (t *Terminal) Prepare() {
 		return
 	}
 	fmt.Fprint(os.Stdout, utils.AnsiHideCursor)
-	fmt.Fprint(os.Stdout, utils.AnsiClearScreen)
-	fmt.Fprint(os.Stdout, utils.AnsiHomeCursor)
+	// Note: We intentionally do NOT clear the screen here.
+	// The Python library preserves terminal history by only writing
+	// to the canvas area. Clearing would erase previous output.
 	t.initialized = true
 }
 
-func (t *Terminal) PrepareCanvas(height int) {
+func (t *Terminal) PrepareCanvas(height int, width int) {
 	t.canvasHeight = height
-	// Print blank lines to establish canvas space, then save cursor position
+	t.canvasWidth = width
+
+	// If reuse-canvas is set, restore cursor to saved position and move up
+	// to reuse the existing canvas area from a previous effect run
+	if t.config.ReuseCanvas {
+		fmt.Fprint(os.Stdout, utils.AnsiDecRestoreCursor)
+		fmt.Fprint(os.Stdout, utils.AnsiDecSaveCursor)
+		fmt.Fprint(os.Stdout, utils.MoveCursorUp(height))
+	}
+
+	// Print blank lines filled with spaces to establish canvas space.
+	// This matches Python behavior which writes full-width lines to claim
+	// the canvas area without erasing terminal history.
+	blankLine := strings.Repeat(" ", width)
 	for i := 0; i < height; i++ {
-		fmt.Fprint(os.Stdout, "\n")
+		fmt.Fprint(os.Stdout, blankLine+"\n")
 	}
 	fmt.Fprint(os.Stdout, utils.AnsiDecSaveCursor)
 }

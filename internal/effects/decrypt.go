@@ -224,3 +224,7 @@ func (d *Decrypt) update() {
 func (d *Decrypt) CanvasHeight() int {
 	return d.base.CanvasHeight()
 }
+
+func (d *Decrypt) CanvasWidth() int {
+	return d.base.CanvasWidth()
+}

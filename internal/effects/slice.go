@@ -202,3 +202,7 @@ func (s *Slice) Next() (string, bool) {
 func (s *Slice) CanvasHeight() int {
 	return s.base.CanvasHeight()
 }
+
+func (s *Slice) CanvasWidth() int {
+	return s.base.CanvasWidth()
+}

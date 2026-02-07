@@ -335,3 +335,7 @@ func (l *LaserEtch) Next() (string, bool) {
 func (l *LaserEtch) CanvasHeight() int {
 	return l.base.CanvasHeight()
 }
+
+func (l *LaserEtch) CanvasWidth() int {
+	return l.base.CanvasWidth()
+}

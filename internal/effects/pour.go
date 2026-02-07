@@ -182,3 +182,7 @@ func (p *Pour) Next() (string, bool) {
 func (p *Pour) CanvasHeight() int {
 	return p.base.CanvasHeight()
 }
+
+func (p *Pour) CanvasWidth() int {
+	return p.base.CanvasWidth()
+}

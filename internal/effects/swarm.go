@@ -319,3 +319,7 @@ func swarmAreaIndex(pathID string) int {
 func (s *Swarm) CanvasHeight() int {
 	return s.base.CanvasHeight()
 }
+
+func (s *Swarm) CanvasWidth() int {
+	return s.base.CanvasWidth()
+}

@@ -776,3 +776,7 @@ func (t *Thunderstorm) Next() (string, bool) {
 func (t *Thunderstorm) CanvasHeight() int {
 	return t.base.CanvasHeight()
 }
+
+func (t *Thunderstorm) CanvasWidth() int {
+	return t.base.CanvasWidth()
+}

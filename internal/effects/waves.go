@@ -169,3 +169,7 @@ func (w *Waves) Next() (string, bool) {
 func (w *Waves) CanvasHeight() int {
 	return w.base.CanvasHeight()
 }
+
+func (w *Waves) CanvasWidth() int {
+	return w.base.CanvasWidth()
+}

@@ -108,3 +108,7 @@ func (s *Scattered) Next() (string, bool) {
 func (s *Scattered) CanvasHeight() int {
 	return s.base.CanvasHeight()
 }
+
+func (s *Scattered) CanvasWidth() int {
+	return s.base.CanvasWidth()
+}

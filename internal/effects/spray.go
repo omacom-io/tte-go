@@ -142,3 +142,7 @@ func (s *Spray) Next() (string, bool) {
 func (s *Spray) CanvasHeight() int {
 	return s.base.CanvasHeight()
 }
+
+func (s *Spray) CanvasWidth() int {
+	return s.base.CanvasWidth()
+}

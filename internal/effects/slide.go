@@ -188,3 +188,7 @@ func (s *Slide) Next() (string, bool) {
 func (s *Slide) CanvasHeight() int {
 	return s.base.CanvasHeight()
 }
+
+func (s *Slide) CanvasWidth() int {
+	return s.base.CanvasWidth()
+}

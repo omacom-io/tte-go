@@ -118,3 +118,7 @@ func (w *Wipe) Next() (string, bool) {
 func (w *Wipe) CanvasHeight() int {
 	return w.base.CanvasHeight()
 }
+
+func (w *Wipe) CanvasWidth() int {
+	return w.base.CanvasWidth()
+}

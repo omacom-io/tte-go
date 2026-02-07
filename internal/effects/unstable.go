@@ -256,3 +256,7 @@ func (u *Unstable) Next() (string, bool) {
 func (u *Unstable) CanvasHeight() int {
 	return u.base.CanvasHeight()
 }
+
+func (u *Unstable) CanvasWidth() int {
+	return u.base.CanvasWidth()
+}

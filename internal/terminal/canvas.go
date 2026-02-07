@@ -43,8 +43,17 @@ func NewCanvas(input string, cfg config.TerminalConfig) *Canvas {
 		}
 	}
 
-	width := resolveDimension(cfg.CanvasWidth, textWidth)
-	height := resolveDimension(cfg.CanvasHeight, textHeight)
+	// Get terminal dimensions for when canvas-width=0 or canvas-height=0
+	termWidth, termHeight := getTerminalSize()
+	if termWidth == 0 {
+		termWidth = 80 // default fallback
+	}
+	if termHeight == 0 {
+		termHeight = 24 // default fallback
+	}
+
+	width := resolveDimension(cfg.CanvasWidth, textWidth, termWidth, cfg.IgnoreTerminalDimensions)
+	height := resolveDimension(cfg.CanvasHeight, textHeight, termHeight, cfg.IgnoreTerminalDimensions)
 	canvas := &Canvas{
 		Width:        width,
 		Height:       height,
@@ -63,14 +72,27 @@ func NewCanvas(input string, cfg config.TerminalConfig) *Canvas {
 	return canvas
 }
 
-func resolveDimension(value int, fallback int) int {
+// resolveDimension resolves canvas dimension based on config value:
+//   - >0: use the specified fixed value
+//   - 0: use terminal dimension
+//   - <0: use input text dimension (capped by terminal unless ignoreTerminal is true)
+func resolveDimension(value int, inputDim int, termDim int, ignoreTerminal bool) int {
+	if value > 0 {
+		return value
+	}
 	if value == 0 {
-		return fallback
+		// 0 means use terminal dimension
+		return termDim
 	}
-	if value < 0 {
-		return fallback
+	// negative means use input dimension
+	if ignoreTerminal {
+		return inputDim
 	}
-	return value
+	// Cap by terminal dimension
+	if inputDim < termDim {
+		return inputDim
+	}
+	return termDim
 }
 
 func (c *Canvas) computeOffset() utils.Coord {
@@ -132,8 +154,10 @@ func (c *Canvas) computeCenter() utils.Coord {
 }
 
 func (c *Canvas) computeTextBounds() {
-	c.TextLeft = c.Offset.Col
-	c.TextBottom = c.Offset.Row
+	// Offset is a 0-based delta, but canvas coordinates are 1-based
+	// So we add 1 to convert to 1-based coordinates
+	c.TextLeft = c.Offset.Col + 1
+	c.TextBottom = c.Offset.Row + 1
 	c.TextRight = c.TextLeft + c.TextWidth - 1
 	c.TextTop = c.TextBottom + c.TextHeight - 1
 	c.TextCenter = utils.Coord{Row: (c.TextBottom + c.TextTop) / 2, Col: (c.TextLeft + c.TextRight) / 2}

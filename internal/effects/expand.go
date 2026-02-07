@@ -90,3 +90,7 @@ func (e *Expand) Next() (string, bool) {
 func (e *Expand) CanvasHeight() int {
 	return e.base.CanvasHeight()
 }
+
+func (e *Expand) CanvasWidth() int {
+	return e.base.CanvasWidth()
+}

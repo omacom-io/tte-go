@@ -419,6 +419,10 @@ func (b *Blackhole) CanvasHeight() int {
 	return b.base.CanvasHeight()
 }
 
+func (b *Blackhole) CanvasWidth() int {
+	return b.base.CanvasWidth()
+}
+
 // Helper functions
 
 func shuffleChars(chars []*engine.EffectCharacter) {

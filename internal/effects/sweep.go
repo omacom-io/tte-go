@@ -149,3 +149,7 @@ func (s *Sweep) Next() (string, bool) {
 func (s *Sweep) CanvasHeight() int {
 	return s.base.CanvasHeight()
 }
+
+func (s *Sweep) CanvasWidth() int {
+	return s.base.CanvasWidth()
+}

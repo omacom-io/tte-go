@@ -251,3 +251,7 @@ func leftMostNonFill(chars []*engine.EffectCharacter) int {
 func (p *Print) CanvasHeight() int {
 	return p.base.CanvasHeight()
 }
+
+func (p *Print) CanvasWidth() int {
+	return p.base.CanvasWidth()
+}

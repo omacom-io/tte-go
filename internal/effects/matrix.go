@@ -453,3 +453,7 @@ func (m *Matrix) Next() (string, bool) {
 func (m *Matrix) CanvasHeight() int {
 	return m.base.CanvasHeight()
 }
+
+func (m *Matrix) CanvasWidth() int {
+	return m.base.CanvasWidth()
+}

@@ -37,7 +37,8 @@ func newOverflowRow(chars []*engine.EffectCharacter, final bool) *overflowRow {
 
 func (r *overflowRow) moveUp() {
 	for _, char := range r.characters {
-		newCoord := utils.Coord{Col: char.Coord.Col, Row: char.Coord.Row + 1}
+		currentRow := char.Motion.CurrentCoord.Row
+		newCoord := utils.Coord{Col: char.Motion.CurrentCoord.Col, Row: currentRow + 1}
 		char.Motion.SetCoordinate(newCoord)
 		char.Coord = newCoord
 	}
@@ -103,6 +104,11 @@ func (o *Overflow) build() {
 	overflowGradient, _ := utils.NewGradient(o.overflowGradientStops, []int{steps}, false)
 	o.overflowGradient = overflowGradient.Spectrum
 
+	// Hide all characters initially - they'll be revealed as they scroll in
+	for _, char := range o.base.Terminal.GetCharacters(true, true, true, false, engine.TopToBottomLeftToRight) {
+		o.base.Terminal.SetCharacterVisibility(char, false)
+	}
+
 	// Get rows
 	rows := o.base.Terminal.GetCharactersGrouped(engine.RowTopToBottom, true, true, true, false)
 
@@ -117,13 +123,14 @@ func (o *Overflow) build() {
 			shuffled[j], shuffled[k] = shuffled[k], shuffled[j]
 		}
 
-		// Create copied characters for each row
+		// Create copied characters for each row (start hidden)
 		for _, row := range shuffled {
 			copiedChars := make([]*engine.EffectCharacter, 0, len(row))
 			for _, char := range row {
 				charCopy := engine.NewEffectCharacter(char.Symbol, char.InputCoord)
 				charCopy.IsAddedCharacter = true
 				o.base.Terminal.AddCharacter(charCopy)
+				o.base.Terminal.SetCharacterVisibility(charCopy, false) // Hide after adding
 				copiedChars = append(copiedChars, charCopy)
 			}
 			o.pendingRows = append(o.pendingRows, newOverflowRow(copiedChars, false))
@@ -155,7 +162,7 @@ func (o *Overflow) Next() (string, bool) {
 					row.moveUp()
 					if !row.final && len(row.characters) > 0 {
 						// Set color based on row position
-						rowY := row.characters[0].Coord.Row
+						rowY := row.characters[0].Motion.CurrentCoord.Row
 						colorIdx := min(rowY, len(o.overflowGradient)-1)
 						if colorIdx >= 0 && colorIdx < len(o.overflowGradient) {
 							row.setColor(o.overflowGradient[colorIdx])
@@ -181,10 +188,10 @@ func (o *Overflow) Next() (string, bool) {
 			o.delay--
 		}
 
-		// Remove rows that have scrolled off the top
+		// Remove rows that have scrolled off the top (runs every frame)
 		remaining := make([]*overflowRow, 0)
 		for _, row := range o.activeRows {
-			if len(row.characters) > 0 && row.characters[0].Coord.Row <= o.base.Canvas.Top {
+			if len(row.characters) > 0 && row.characters[0].Motion.CurrentCoord.Row <= o.base.Canvas.Top {
 				remaining = append(remaining, row)
 			} else {
 				// Hide characters that scrolled off
@@ -203,4 +210,8 @@ func (o *Overflow) Next() (string, bool) {
 
 func (o *Overflow) CanvasHeight() int {
 	return o.base.CanvasHeight()
+}
+
+func (o *Overflow) CanvasWidth() int {
+	return o.base.CanvasWidth()
 }

@@ -180,3 +180,7 @@ func (b *BouncyBalls) findMinRow() int {
 func (b *BouncyBalls) CanvasHeight() int {
 	return b.base.CanvasHeight()
 }
+
+func (b *BouncyBalls) CanvasWidth() int {
+	return b.base.CanvasWidth()
+}

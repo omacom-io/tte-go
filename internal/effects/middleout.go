@@ -120,3 +120,7 @@ func (m *MiddleOut) Next() (string, bool) {
 func (m *MiddleOut) CanvasHeight() int {
 	return m.base.CanvasHeight()
 }
+
+func (m *MiddleOut) CanvasWidth() int {
+	return m.base.CanvasWidth()
+}

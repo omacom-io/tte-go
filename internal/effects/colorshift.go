@@ -199,3 +199,7 @@ func (c *ColorShift) Next() (string, bool) {
 func (c *ColorShift) CanvasHeight() int {
 	return c.base.CanvasHeight()
 }
+
+func (c *ColorShift) CanvasWidth() int {
+	return c.base.CanvasWidth()
+}

@@ -609,6 +609,10 @@ func (v *VHSTape) CanvasHeight() int {
 	return v.base.CanvasHeight()
 }
 
+func (v *VHSTape) CanvasWidth() int {
+	return v.base.CanvasWidth()
+}
+
 func randIntInclusive(minVal, maxVal int) int {
 	if maxVal < minVal {
 		minVal, maxVal = maxVal, minVal

@@ -271,3 +271,7 @@ func (c *Crumble) Next() (string, bool) {
 func (c *Crumble) CanvasHeight() int {
 	return c.base.CanvasHeight()
 }
+
+func (c *Crumble) CanvasWidth() int {
+	return c.base.CanvasWidth()
+}

@@ -249,3 +249,7 @@ func (s *Spotlights) updateIllumination() {
 func (s *Spotlights) CanvasHeight() int {
 	return s.base.CanvasHeight()
 }
+
+func (s *Spotlights) CanvasWidth() int {
+	return s.base.CanvasWidth()
+}

@@ -10,8 +10,12 @@ import (
 type Smoke struct {
 	base *BaseEffect
 
-	pendingChars     []*engine.EffectCharacter
 	activeCharacters map[*engine.EffectCharacter]struct{}
+
+	// BFS flood state
+	frontier  []*engine.EffectCharacter
+	visited   map[*engine.EffectCharacter]bool
+	treeEdges map[*engine.EffectCharacter][]*engine.EffectCharacter // spanning tree edges
 
 	// Config
 	startingColor          utils.Color
@@ -20,12 +24,13 @@ type Smoke struct {
 	finalGradientStops     []utils.Color
 	finalGradientSteps     []int
 	finalGradientDirection utils.GradientDirection
+	useWholeCanvas         bool
 }
 
 func NewSmoke(input string, cfg config.TerminalConfig) engine.Effect {
 	base := NewBaseEffect(input, cfg)
 
-	// Config defaults
+	// Config defaults matching Python
 	startingColor := mustColors("7A7A7A")[0]
 	smokeSymbols := []string{"░", "▒", "▓", "▒", "░"}
 	smokeGradientStops := mustColors("242424", "FFFFFF")
@@ -35,14 +40,17 @@ func NewSmoke(input string, cfg config.TerminalConfig) engine.Effect {
 
 	s := &Smoke{
 		base:                   base,
-		pendingChars:           make([]*engine.EffectCharacter, 0),
 		activeCharacters:       make(map[*engine.EffectCharacter]struct{}),
+		frontier:               make([]*engine.EffectCharacter, 0),
+		visited:                make(map[*engine.EffectCharacter]bool),
+		treeEdges:              make(map[*engine.EffectCharacter][]*engine.EffectCharacter),
 		startingColor:          startingColor,
 		smokeSymbols:           smokeSymbols,
 		smokeGradientStops:     smokeGradientStops,
 		finalGradientStops:     finalGradientStops,
 		finalGradientSteps:     finalGradientSteps,
 		finalGradientDirection: finalGradientDirection,
+		useWholeCanvas:         false,
 	}
 
 	s.build()
@@ -60,110 +68,176 @@ func (s *Smoke) build() {
 		s.finalGradientDirection,
 	)
 
-	// Build smoke gradient
-	smokeGradient, _ := utils.NewGradient(s.smokeGradientStops, []int{8}, false)
+	// Build smoke gradient: smoke_stops + reversed(final_stops)
+	// Python: Gradient(*smoke_gradient_stops, *final_gradient_stops[::-1], steps=(3, 4))
+	smokeStops := make([]utils.Color, 0, len(s.smokeGradientStops)+len(s.finalGradientStops))
+	smokeStops = append(smokeStops, s.smokeGradientStops...)
+	// Append reversed final gradient stops
+	for i := len(s.finalGradientStops) - 1; i >= 0; i-- {
+		smokeStops = append(smokeStops, s.finalGradientStops[i])
+	}
+	// Steps: 3 for first segment, 4 for rest (approximation)
+	smokeSteps := make([]int, len(smokeStops)-1)
+	for i := range smokeSteps {
+		if i == 0 {
+			smokeSteps[i] = 3
+		} else {
+			smokeSteps[i] = 4
+		}
+	}
+	smokeGradient, _ := utils.NewGradient(smokeStops, smokeSteps, false)
 
-	// Get all characters using BFS from a random starting point
+	// Get all characters (including fill chars)
 	allChars := s.base.Terminal.GetCharacters(true, true, true, false, engine.TopToBottomLeftToRight)
 	if len(allChars) == 0 {
 		return
 	}
 
-	// Build BFS order from center
-	visited := make(map[*engine.EffectCharacter]bool)
-	queue := make([]*engine.EffectCharacter, 0)
-
-	// Find character closest to center
-	center := s.base.Canvas.Center
-	var startChar *engine.EffectCharacter
-	minDist := float64(1000000)
-	for _, char := range allChars {
-		dx := float64(char.InputCoord.Col - center.Col)
-		dy := float64(char.InputCoord.Row - center.Row)
-		dist := dx*dx + dy*dy
-		if dist < minDist {
-			minDist = dist
-			startChar = char
-		}
-	}
-
-	if startChar == nil {
-		startChar = allChars[0]
-	}
-
-	queue = append(queue, startChar)
-	visited[startChar] = true
-
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
-		s.pendingChars = append(s.pendingChars, current)
-
-		// Add unvisited neighbors
-		for _, neighbor := range current.Neighbors {
-			if !visited[neighbor] {
-				visited[neighbor] = true
-				queue = append(queue, neighbor)
-			}
-		}
-	}
-
-	// Add any remaining unvisited chars (disconnected regions)
-	for _, char := range allChars {
-		if !visited[char] {
-			s.pendingChars = append(s.pendingChars, char)
-		}
-	}
-
-	// Set up each character with smoke and final scenes
-	for _, character := range s.pendingChars {
-		charFinalColor := finalGradientMapping[character.InputCoord]
-
-		// Initial appearance with starting color
+	// Python: All characters start VISIBLE with starting color
+	for _, character := range allChars {
+		s.base.Terminal.SetCharacterVisibility(character, true)
 		startingColorCopy := s.startingColor
 		character.SetVisual(engine.CharacterVisual{
 			Symbol: character.Symbol,
 			Colors: &utils.ColorPair{FG: &startingColorCopy},
 		})
+	}
 
-		// Smoke scene - animate through smoke symbols with smoke gradient
-		smokeScene := character.Animation.NewScene("smoke")
-		for i, symbol := range s.smokeSymbols {
-			colorIdx := i * len(smokeGradient.Spectrum) / len(s.smokeSymbols)
-			if colorIdx >= len(smokeGradient.Spectrum) {
-				colorIdx = len(smokeGradient.Spectrum) - 1
-			}
-			colorCopy := smokeGradient.Spectrum[colorIdx]
-			_ = smokeScene.AddFrame(symbol, 3, &utils.ColorPair{FG: &colorCopy})
+	// Build spanning tree using simplified Prim's algorithm for organic spread
+	// Returns the starting character used for the tree
+	startChar := s.buildSpanningTree(allChars)
+
+	// Set up scenes for each character
+	blackColor := mustColors("000000")[0]
+	for _, character := range allChars {
+		charFinalColor, ok := finalGradientMapping[character.InputCoord]
+		if !ok {
+			charFinalColor = blackColor
 		}
 
-		// Final scene - fade to final color
-		finalScene := character.Animation.NewScene("final")
-		finalColorGradient, _ := utils.NewGradient([]utils.Color{smokeGradient.Spectrum[len(smokeGradient.Spectrum)-1], charFinalColor}, []int{8}, false)
-		for _, color := range finalColorGradient.Spectrum {
+		// Paint scene: final_gradient_stops -> char's final color
+		// Python: Gradient(*final_gradient_stops, char_final_color, steps=5)
+		paintStops := make([]utils.Color, 0, len(s.finalGradientStops)+1)
+		paintStops = append(paintStops, s.finalGradientStops...)
+		paintStops = append(paintStops, charFinalColor)
+		paintSteps := make([]int, len(paintStops)-1)
+		for i := range paintSteps {
+			paintSteps[i] = 5
+		}
+		paintGradient, _ := utils.NewGradient(paintStops, paintSteps, false)
+
+		paintScene := character.Animation.NewScene("paint")
+		// Apply gradient across frames with character's symbol
+		for _, color := range paintGradient.Spectrum {
 			colorCopy := color
-			_ = finalScene.AddFrame(character.Symbol, 3, &utils.ColorPair{FG: &colorCopy})
+			_ = paintScene.AddFrame(character.Symbol, 5, &utils.ColorPair{FG: &colorCopy})
 		}
 
-		// Event: smoke complete -> activate final
+		// Smoke scene: cycle through smoke symbols with smoke gradient colors
+		// Python: apply_gradient_to_symbols(smoke_symbols, duration=3, fg_gradient=smoke_gradient)
+		smokeScene := character.Animation.NewScene("smoke")
+		// Drive frames by gradient spectrum, cycling through symbols
+		for i, color := range smokeGradient.Spectrum {
+			symbolIdx := i % len(s.smokeSymbols)
+			colorCopy := color
+			_ = smokeScene.AddFrame(s.smokeSymbols[symbolIdx], 3, &utils.ColorPair{FG: &colorCopy})
+		}
+
+		// Event: smoke complete -> activate paint
 		character.EventHandler.RegisterEvent(
 			engine.EventSceneComplete,
 			smokeScene,
 			engine.ActionActivateScene,
-			finalScene,
+			paintScene,
 		)
 	}
+
+	// Activate smoke on starting char immediately (use same start as spanning tree)
+	startChar.Animation.ActivateScene("smoke")
+	s.activeCharacters[startChar] = struct{}{}
+	s.visited[startChar] = true
+	s.frontier = append(s.frontier, startChar)
+}
+
+// buildSpanningTree creates a randomized spanning tree for organic smoke spread
+// Returns the starting character used for the tree
+func (s *Smoke) buildSpanningTree(chars []*engine.EffectCharacter) *engine.EffectCharacter {
+	if len(chars) == 0 {
+		return nil
+	}
+
+	// Build coord -> char lookup
+	lookup := make(map[utils.Coord]*engine.EffectCharacter)
+	for _, c := range chars {
+		lookup[c.InputCoord] = c
+	}
+
+	// Simple randomized Prim's: start from random char, grow tree
+	inTree := make(map[*engine.EffectCharacter]bool)
+	startIdx := utils.RandIntn(len(chars))
+	start := chars[startIdx]
+	inTree[start] = true
+
+	// Edge candidates: (from, to) pairs
+	type edge struct {
+		from, to *engine.EffectCharacter
+		weight   float64
+	}
+	edges := make([]edge, 0)
+
+	// Add initial edges from start
+	addEdges := func(c *engine.EffectCharacter) {
+		for _, neighbor := range c.Neighbors {
+			if neighbor != nil && !inTree[neighbor] {
+				edges = append(edges, edge{from: c, to: neighbor, weight: utils.RandFloat64()})
+			}
+		}
+	}
+	addEdges(start)
+
+	for len(edges) > 0 {
+		// Pick random edge (weighted selection approximation - just pick random)
+		idx := utils.RandIntn(len(edges))
+		e := edges[idx]
+		// Remove this edge
+		edges[idx] = edges[len(edges)-1]
+		edges = edges[:len(edges)-1]
+
+		if inTree[e.to] {
+			continue
+		}
+
+		// Add to tree - store edge bidirectionally for BFS from any start
+		inTree[e.to] = true
+		s.treeEdges[e.from] = append(s.treeEdges[e.from], e.to)
+		s.treeEdges[e.to] = append(s.treeEdges[e.to], e.from)
+
+		// Add new edges from this node
+		addEdges(e.to)
+	}
+
+	return start
 }
 
 func (s *Smoke) Next() (string, bool) {
-	// Add characters to active set
-	charsToAdd := 3 + utils.RandIntn(5) // 3-7 per frame
-	for i := 0; i < charsToAdd && len(s.pendingChars) > 0; i++ {
-		nextChar := s.pendingChars[0]
-		s.pendingChars = s.pendingChars[1:]
-		s.base.Terminal.SetCharacterVisibility(nextChar, true)
-		nextChar.Animation.ActivateScene("smoke")
-		s.activeCharacters[nextChar] = struct{}{}
+	// BFS wave expansion using spanning tree edges
+	if len(s.frontier) > 0 {
+		nextFrontier := make([]*engine.EffectCharacter, 0)
+
+		for _, char := range s.frontier {
+			// Get tree children (not all neighbors)
+			children := s.treeEdges[char]
+			for _, child := range children {
+				if !s.visited[child] {
+					s.visited[child] = true
+					child.Animation.ActivateScene("smoke")
+					s.activeCharacters[child] = struct{}{}
+					nextFrontier = append(nextFrontier, child)
+				}
+			}
+		}
+
+		s.frontier = nextFrontier
 	}
 
 	// Tick all active characters
@@ -174,7 +248,7 @@ func (s *Smoke) Next() (string, bool) {
 		}
 	}
 
-	if len(s.pendingChars) > 0 || len(s.activeCharacters) > 0 {
+	if len(s.frontier) > 0 || len(s.activeCharacters) > 0 {
 		return s.base.Terminal.GetFormattedOutputString(), true
 	}
 
@@ -183,4 +257,8 @@ func (s *Smoke) Next() (string, bool) {
 
 func (s *Smoke) CanvasHeight() int {
 	return s.base.CanvasHeight()
+}
+
+func (s *Smoke) CanvasWidth() int {
+	return s.base.CanvasWidth()
 }

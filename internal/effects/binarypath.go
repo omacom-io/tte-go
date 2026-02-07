@@ -40,3 +40,7 @@ func (b *BinaryPath) Next() (string, bool) {
 func (b *BinaryPath) CanvasHeight() int {
 	return b.base.CanvasHeight()
 }
+
+func (b *BinaryPath) CanvasWidth() int {
+	return b.base.CanvasWidth()
+}

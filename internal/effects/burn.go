@@ -294,3 +294,7 @@ func (b *Burn) Next() (string, bool) {
 func (b *Burn) CanvasHeight() int {
 	return b.base.CanvasHeight()
 }
+
+func (b *Burn) CanvasWidth() int {
+	return b.base.CanvasWidth()
+}

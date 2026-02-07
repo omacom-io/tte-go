@@ -40,3 +40,10 @@ func (e *BaseEffect) CanvasHeight() int {
 	}
 	return e.Canvas.Height
 }
+
+func (e *BaseEffect) CanvasWidth() int {
+	if e.Canvas == nil {
+		return 0
+	}
+	return e.Canvas.Width
+}
